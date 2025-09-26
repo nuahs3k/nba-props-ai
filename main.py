@@ -1,41 +1,45 @@
-from scripts.fetch_odds import fetch_odds
-from scripts.scrape_players import get_all_players
+# main.py
+import pandas as pd
+from scripts.scrape_players import get_players
 from scripts.scrape_stats import get_player_stats
 from scripts.scrape_team import get_team_stats
-from scripts.scrape_news import get_injury_news
-from scripts.process_data import merge_data
-from scripts.projections import generate_projections
-from scripts.projector import calculate_edges
+from scripts.scrape_news import get_injury_data
+from scripts.fetch_odds import fetch_odds
+from scripts.projections import calculate_projections
+from scripts.process_data import process_data
 
 def run():
     print("Fetching player list...")
-    players = get_all_players()
+    players = get_players()
+
+    if players.empty:
+        print("⚠️ Season has not started or no player data available yet. Exiting...")
+        return
 
     print("Scraping player stats...")
     player_stats = get_player_stats(players)
 
-    print("Scraping team stats...")
+    print("Scraping team advanced stats...")
     team_stats = get_team_stats()
 
-    print("Scraping injury/news updates...")
-    news_data = get_injury_news(players)
+    print("Scraping injury/news adjustments...")
+    injury_data = get_injury_data()
 
-    print("Fetching odds...")
-    odds_data = fetch_odds(api_key="d8475e9d02d7bdd135300c54d7b6c116")
+    print("Fetching odds from sportsbook API...")
+    odds_df = fetch_odds()
 
-    print("Merging data...")
-    merged_data = merge_data(player_stats, team_stats, news_data, odds_data)
+    print("Calculating projections...")
+    projections = calculate_projections(player_stats, team_stats, injury_data)
 
-    print("Generating projections...")
-    projections = generate_projections(merged_data)
+    print("Processing data and calculating edges...")
+    results = process_data(projections, odds_df)
 
-    print("Calculating edges and top plays...")
-    results = calculate_edges(projections)
+    if results.empty:
+        print("❌ No results after processing. Exiting...")
+        return
 
-    print("Top 25 Picks + Play of the Day:")
-    print(results.head(25))
-    results.to_csv("nba_top_plays.csv", index=False)
-    print("Saved to nba_top_plays.csv")
+    print("✅ Projections and edges calculated successfully!")
+    print(results.head(10))
 
 if __name__ == "__main__":
     run()
