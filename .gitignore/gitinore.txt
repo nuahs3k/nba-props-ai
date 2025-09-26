@@ -1,0 +1,28 @@
+# Ignore Python virtual environment
+venv/
+ENV/
+.env/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VS Code settings
+.vscode/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# macOS files
+.DS_Store
+
+# Logs
+*.log
+
+# Any database or local files
+*.sqlite3
+*.db
+
+# Ignore system files
+Thumbs.db
